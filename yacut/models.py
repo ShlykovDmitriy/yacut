@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from yacut import db
+from . import db
 
 
 class URLMap(db.Model):
@@ -8,3 +8,5 @@ class URLMap(db.Model):
     original = db.Column(db.String(128), nullable=False)
     short = db.Column(db.String(16), nullable=False)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+
