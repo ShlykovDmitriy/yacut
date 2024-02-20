@@ -8,6 +8,7 @@ from .utils import check_unique_short_url, get_short_url
 
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
+    """Функция главной страницы."""
     form = URLForm()
     if not form.validate_on_submit():
         return render_template('yacut.html', form=form)
@@ -30,6 +31,7 @@ def index_view():
 
 @app.route('/<string:short>')
 def short_url_redirect(short):
+    """Функция перенаправляет на оригинальную страницу"""
     short_url = URLMap.query.filter_by(short=short).first()
     if not short_url:
         abort(404)

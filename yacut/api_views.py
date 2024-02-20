@@ -11,14 +11,16 @@ from .utils import get_short_url
 
 @app.route('/api/id/<string:short>/', methods=['GET'])
 def get_original_url(short):
+    """Получение оригинальной ссылки из короткой"""
     short_url = URLMap.query.filter_by(short=short).first()
     if not short_url:
-        raise InvalidAPIUsage('Указанный id не найден', 404)
+        raise InvalidAPIUsage('Указанный id не найден', HTTPStatus.NOT_FOUND)
     return jsonify({"url": short_url.original}), HTTPStatus.OK
 
 
 @app.route('/api/id/', methods=['POST'])
 def create_short_url():
+    """Создание записи ссылок в БД"""
     data = request.get_json()
     if not data:
         raise InvalidAPIUsage('Отсутствует тело запроса')
