@@ -18,7 +18,7 @@ def internal_error(error):
     return render_template('500.html'), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
-class InvalidAPIUsage(Exception):
+class InvalidData(Exception):
     """Кастомный класс исключений"""
     status_code = HTTPStatus.BAD_REQUEST
 
@@ -32,7 +32,7 @@ class InvalidAPIUsage(Exception):
         return dict(message=self.message)
 
 
-@app.errorhandler(InvalidAPIUsage)
+@app.errorhandler(InvalidData)
 def invalid_api_usage(error):
     """Метод для сериализации переданного сообщения об ошибке"""
     return jsonify(error.to_dict()), error.status_code

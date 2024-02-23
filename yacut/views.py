@@ -1,9 +1,10 @@
 from flask import abort, flash, redirect, render_template, request
 
 from . import app, db
+from .error_handlers import InvalidData
 from .forms import URLForm
 from .models import URLMap
-from .utils import get_url_by_short, generation_unique_short_link
+from .utils import (get_url_by_short, save_in_db, validation_short_url)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -12,21 +13,20 @@ def index_view():
     form = URLForm()
     if not form.validate_on_submit():
         return render_template('yacut.html', form=form)
-    short = form.custom_id.data
-    if not short:
-        short = generation_unique_short_link()
-    if get_url_by_short(short):
-        flash('Предложенный вариант короткой ссылки уже существует.',)
-        return render_template('yacut.html', form=form)
-    url = URLMap(
-        original=form.original_link.data,
-        short=short
-    )
-    db.session.add(url)
-    db.session.commit()
-    flash(f'Короткая ссылка: '
-          f'<a href="{request.base_url}{short}">{request.base_url}{short}</a>')
-    return render_template('yacut.html', url=url, form=form)
+    url = URLMap()
+    try:
+        short_link = validation_short_url(form.custom_id.data)
+        url = URLMap(
+            original=form.original_link.data,
+            short=short_link
+        )
+        save_in_db(db, url)
+        flash(f'Короткая ссылка: '
+              f'<a href="{request.base_url}{short_link}">{request.base_url}{short_link}</a>')
+        return render_template('yacut.html', url=url, form=form)
+    except InvalidData as e:
+        flash(str(e.message))
+        return render_template('yacut.html', url=url, form=form)
 
 
 @app.route('/<string:short>')

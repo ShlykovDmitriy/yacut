@@ -1,7 +1,9 @@
 import random
+import re
 import string as s
 
-from .constants import LEN_SHORT_URL_AUTO
+from .constants import LEN_SHORT_URL_AUTO, SHORT_URL_REGEX_PATTERN
+from .error_handlers import InvalidData
 from .models import URLMap
 
 
@@ -18,20 +20,25 @@ def get_url_by_short(short):
     return URLMap.query.filter_by(short=short).first()
 
 
-def sd(data):
-    data = request.get_json()
+def validation_short_url(short: None):
+    if not short:
+        short = generation_unique_short_link()
+    elif get_url_by_short(short):
+        raise InvalidData('Предложенный вариант короткой ссылки уже существует.')
+    elif not re.match(SHORT_URL_REGEX_PATTERN, short):
+        raise InvalidData('Указано недопустимое имя для короткой ссылки')
+    return short
+
+
+def validation_api(data):
     if not data:
-        raise InvalidAPIUsage('Отсутствует тело запроса')
+        raise InvalidData('Отсутствует тело запроса')
     if 'url' not in data:
-        raise InvalidAPIUsage('\"url\" является обязательным полем!')
-    if not data.get('custom_id'):
-        data['custom_id'] = generation_unique_short_link()
-    elif get_url_by_short(data['custom_id']):
-        raise InvalidAPIUsage('Предложенный вариант короткой ссылки уже существует.')
-    elif not re.match(SHORT_URL_REGEX_PATTERN, data['custom_id']):
-        raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки')
-    url_map = URLMap()
-    url_map.from_dict(data)
-    db.session.add(url_map)
+        raise InvalidData('\"url\" является обязательным полем!')
+    data['custom_id'] = validation_short_url(data.get('custom_id'))
+    return data
+
+
+def save_in_db(db, url):
+    db.session.add(url)
     db.session.commit()
-    return jsonify(url_map.to_dict()), HTTPStatus.CREATED
