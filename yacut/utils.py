@@ -7,38 +7,32 @@ from .error_handlers import InvalidData
 from .models import URLMap
 
 
-def generation_unique_short_link():
-    """Создание короткой ссылки"""
-    short = ''.join(random.choice(s.ascii_letters + s.digits) for i in range(LEN_SHORT_URL_AUTO))
-    if not get_url_by_short(short):
+class ShortUrlService:
+    """Сервис для работы с короткими ссылками"""
+
+    def generate_unique_short_link(self):
+        """Создание уникальной короткой ссылки"""
+        while True:
+            short = ''.join(random.choice(s.ascii_letters + s.digits) for i in range(LEN_SHORT_URL_AUTO))
+            if not self.get_url_by_short(short):
+                return short
+
+    def get_url_by_short(self, short):
+        """Проверка наличия короткой ссылки в базе данных"""
+        return URLMap.query.filter_by(short=short).first()
+
+    def create_or_validate_short_url(self, short):
+        """Создает которкую ссылку или валидирует ее при наличии."""
+        if not short:
+            short = self.generate_unique_short_link()
+        elif self.get_url_by_short(short):
+            raise InvalidData('Предложенный вариант короткой ссылки уже существует.')
+        elif not re.match(SHORT_URL_REGEX_PATTERN, short):
+            raise InvalidData('Указано недопустимое имя для короткой ссылки')
         return short
-    return generation_unique_short_link()
-
-
-def get_url_by_short(short):
-    """Проверка на уникальность короткой ссылки"""
-    return URLMap.query.filter_by(short=short).first()
-
-
-def validation_short_url(short: None):
-    if not short:
-        short = generation_unique_short_link()
-    elif get_url_by_short(short):
-        raise InvalidData('Предложенный вариант короткой ссылки уже существует.')
-    elif not re.match(SHORT_URL_REGEX_PATTERN, short):
-        raise InvalidData('Указано недопустимое имя для короткой ссылки')
-    return short
-
-
-def validation_api(data):
-    if not data:
-        raise InvalidData('Отсутствует тело запроса')
-    if 'url' not in data:
-        raise InvalidData('\"url\" является обязательным полем!')
-    data['custom_id'] = validation_short_url(data.get('custom_id'))
-    return data
 
 
 def save_in_db(db, url):
+    """Создает запись в БД"""
     db.session.add(url)
     db.session.commit()

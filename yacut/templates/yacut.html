@@ -22,11 +22,9 @@
               </p>
               {{ form.custom_id(class="form-control form-control-lg py-2 mb-3", placeholder=form.custom_id.label.text, type="url", id="form-link") }}
               <p>
-                {% if form.custom_id.errors %}
                   {% for error in form.custom_id.errors %}
                     <span style="color: red">*{{ error }}</span>
                   {% endfor %}
-                {% endif %}
               </p>
               {{ form.submit(type="submit", class="btn btn-primary") }}
             </form>
