@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import url_for
 
 from . import db
-from .constants import MAX_LEN_SHORT_URL, MAX_LEN_ORIGINAL_URL
+from .constants import MAX_LEN_ORIGINAL_URL, MAX_LEN_SHORT_URL
 
 
 class URLMap(db.Model):
@@ -25,3 +25,8 @@ class URLMap(db.Model):
         """Метод конвертации словаря в объект"""
         setattr(self, 'original', data['url'])
         setattr(self, 'short', data['custom_id'])
+
+    @classmethod
+    def get_url_by_short(self, short):
+        """Проверка наличия короткой ссылки в базе данных"""
+        return URLMap.query.filter_by(short=short).first()
