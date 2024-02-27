@@ -39,11 +39,13 @@
           </div>
           <div class="col-sm">
             <h5 class="text-center">
-              {% with messages = get_flashed_messages() %}
-                  {% for message in messages %}
-                    {{ message|safe }}
-                  {% endfor %}
-              {% endwith %}
+              {% if error %}
+                <p style="color: red;">{{ error }}</p>
+              {% endif %}
+
+              {% if url %}
+                <p>Короткая ссылка: <a href="{{ url }}">{{ url }}</a></p>
+              {% endif %}
             </h5>
           </div>
           <div class="col-sm">

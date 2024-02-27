@@ -1,4 +1,4 @@
-from flask import abort, flash, redirect, render_template, request
+from flask import abort, redirect, render_template, request
 
 from . import app
 from .error_handlers import InvalidData
@@ -18,13 +18,10 @@ def index_view():
     try:
         url_map = short_url_service.create_short_url(
             form.original_link.data, form.custom_id.data)
-        flash(f'Короткая ссылка: '
-              f'<a href="{request.base_url}{url_map.short}">'
-              f'{request.base_url}{url_map.short}</a>')
-        return render_template('yacut.html', url=url_map, form=form)
+        return render_template('yacut.html', url=f'{request.base_url}{url_map.short}', form=form)
     except InvalidData as e:
-        flash(str(e.message))
-        return render_template('yacut.html', form=form)
+        error = str(e.message)
+        return render_template('yacut.html', error=error, form=form)
 
 
 @app.route('/<string:short>')

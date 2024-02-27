@@ -16,7 +16,7 @@ def get_original_url(short):
     short_url = URLMap.get_url_by_short(short)
     if not short_url:
         raise InvalidData('Указанный id не найден', HTTPStatus.NOT_FOUND)
-    return jsonify({"url": short_url.original}), HTTPStatus.OK
+    return jsonify({'url': short_url.original}), HTTPStatus.OK
 
 
 @app.route('/api/id/', methods=['POST'])
