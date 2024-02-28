@@ -35,8 +35,11 @@ class ShortUrlService:
 
     def create_short_url(self, url, short: None):
         """Создает запись в БД"""
-        self.short_url = short if short else self._generate_unique_short_link()
-        self._validate_short_url()
+        if short:
+            self.short_url = short
+            self._validate_short_url()
+        else:
+            self.short_url = self._generate_unique_short_link()
         url_map = URLMap()
         url_map.from_dict({'url': url, 'custom_id': self.short_url})
         db.session.add(url_map)
